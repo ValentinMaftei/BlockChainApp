@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Web3 from 'web3';
-const { abi } = require('./build/contracts/Ticket.json');
+import Ticket from 'contracts/Ticket.json';
 
 export async function connectToMetamask() {
     try {
@@ -31,10 +31,5 @@ export async function disconnectFromMetamask() {
 }
 
 export async function loadContract() {
-    try {
-        const response = await fetch('Ticket.json');
-        console.log("Contract loaded", response);
-    } catch (error) {
-        console.error("Error loading contract:", error);
-    }
+    console.log(Ticket.abi);    
 }

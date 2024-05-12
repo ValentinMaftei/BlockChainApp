@@ -16,7 +16,8 @@
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4",
-    "web3": "^4.8.0"
+    "web3": "^4.8.0",
+    "contracts": "file:../../build/contracts"
   },
   "scripts": {
     "start": "react-scripts start",

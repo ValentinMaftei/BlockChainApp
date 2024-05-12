@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 
 function App() {
 
+
   const [account, setAccount] = useState('');
   const [balance, setBalance] = useState(null);
 
