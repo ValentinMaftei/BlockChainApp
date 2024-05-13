@@ -27,7 +27,12 @@ const TicketSell = ({ ticket }) => {
                 <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{ticket.description}</p>
             </div>
             <div className="flex-col flex h-full gap-2 min-w-fit">
-                <button onClick={togglePopup} type="button" className="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">SELL</button>
+                {
+                    ticket.forSale ?
+                        <button type="button" disabled={ticket.forSale} class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">FOR SALE</button>
+                        :
+                        <button type="button" onClick={togglePopup} class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">SELL</button>
+                }
             </div>
             {
                 isOpen && (

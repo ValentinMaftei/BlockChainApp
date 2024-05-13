@@ -19,8 +19,21 @@ contract("Ticket", accounts => {
         assert.equal(ticket.id.toNumber(), ticketCount.toNumber());
         assert.equal(ticket.name, 'Coldplay');
         assert.equal(ticket.description, 'Concert Arena Nationala');
-        assert.equal(ticket.price, 10);
+        assert.equal(ticket.price, 0);
         assert.equal(ticket.owner, accounts[0]);
-        assert.equal(ticket.purchased, false);
+        assert.equal(ticket.forSale, false);
+    })
+
+    it ("create tickets", async () => {
+        const result = await this.ticket.createTicket('The Weeknd', 'Concert Arenele Romane');
+        const ticketCount = await this.ticket.ticketCount();
+        assert.equal(ticketCount, 2);
+        const event = result.logs[0].args;
+        assert.equal(event.id.toNumber(), 2);
+        assert.equal(event.name, 'The Weeknd');
+        assert.equal(event.description, 'Concert Arenele Romane');
+        assert.equal(event.price, 0);
+        assert.equal(event.owner, accounts[0]);
+        assert.equal(event.forSale, false);
     })
 })    

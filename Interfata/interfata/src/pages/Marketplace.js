@@ -14,6 +14,7 @@ const Marketplace = ({arrayTickets}) => {
                         {
                             arrayTickets &&
                             arrayTickets.map((ticket, index) => (
+                                ticket.forSale &&
                                 <Ticket key={index} ticket={ticket} />
                             ))
                         }

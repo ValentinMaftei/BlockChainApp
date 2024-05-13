@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Web3 from 'web3';
 import Ticket from 'contracts/Ticket.json';
+import { logout } from './features/UserSlice';
 
 let account;
 
@@ -32,17 +33,17 @@ export async function disconnectFromMetamask() {
     }
 }
 
-export async function getAccount(setAccount, setBalance) {
+export async function getAccount(dispatch, setAccount, setBalance) {
     try {
         console.log("Connecting to metamask");
         await connectToMetamask();
         if (window.web3) {
             const accounts = await window.web3.eth.getAccounts();
             if (accounts.length > 0) {
-                setAccount(accounts[0]);
+                dispatch(setAccount(accounts[0]));
                 account = accounts[0];
                 const userBalance = await window.web3.eth.getBalance(accounts[0]);
-                setBalance(window.web3.utils.fromWei(userBalance, 'ether'));
+                dispatch(setBalance(window.web3.utils.fromWei(userBalance, 'ether')));
                 console.log("Account is set ", accounts[0], userBalance);
             } else {
                 console.log("No accounts found");
@@ -55,11 +56,11 @@ export async function getAccount(setAccount, setBalance) {
     }
 }
 
-export async function deleteAccount(setAccount, setBalance) {
+export async function deleteAccount(dispatch, logout) {
     await disconnectFromMetamask();
-    setAccount(null);
-    setBalance(null);
-  }
+    dispatch(logout());
+    window.location.reload();
+}
 
 let ticketContract;
 
@@ -72,10 +73,6 @@ export async function loadContract() {
         Ticket.abi,
         Ticket.networks[network].address
     );
-}
-
-export const createTicket = (_name, _description, _price) => {
-    ticketContract.methods.createTicket(_name, _description, _price, account);
 }
 
 export const renderTickets = async () => {
@@ -101,4 +98,13 @@ export const getAccountTickets = async (account) => {
 
     console.log(tickets);
     return tickets;
+}
+
+
+export const createTicket = async (name, description, price) => {
+    try {
+        await ticketContract.methods.createTicket(name, description, price).send({ from: account });
+    } catch (error) {
+        console.error("Error creating ticket:", error);
+    }
 }

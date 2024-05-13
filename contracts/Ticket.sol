@@ -12,18 +12,28 @@ contract Ticket{
         string description;
         uint price;
         address payable owner;
-        bool purchased;
+        bool forSale;
     }
 
     mapping(uint => TicketStruct) public tickets;
 
+    event TicketCreated(
+        uint id,
+        string name,
+        string description,
+        uint price,
+        address payable owner,
+        bool forSale
+    );
+
     constructor() public{
-        createTicket("Coldplay", "Concert Arena Nationala", 10);
+        createTicket("Coldplay", "Concert Arena Nationala");
     }
 
-    function createTicket(string memory _name, string memory _description, uint _price) public{
+    function createTicket(string memory _name, string memory _description) public{
         ticketCount++;
-        tickets[ticketCount] = TicketStruct(ticketCount, _name, _description, _price, msg.sender, false);
+        tickets[ticketCount] = TicketStruct(ticketCount, _name, _description, 0, msg.sender, false);
+        emit TicketCreated(ticketCount, _name, _description, 0, msg.sender, false);
     }
 
     function getAccountTickets(address _account) public view returns(uint[] memory){

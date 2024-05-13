@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-const Sidebar = ({balance, account}) => {
+const Sidebar = ({ balance, account }) => {
     return (
         <nav className="z-[100] absolute h-20 w-screen bg-white border-gray-200 dark:bg-darkest-blue/[0.5]">
             <div className="flex flex-wrap items-center justify-between mx-auto px-8 py-5">
@@ -18,7 +18,10 @@ const Sidebar = ({balance, account}) => {
                 <div className="flex flex-row items-center gap-6" id="navbar-default">
                     <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0">
                         <li><NavLink to="/" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">Home</NavLink></li>
-                        <li><NavLink to="/marketplace" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">Marketplace</NavLink></li>
+                        {
+                            account &&
+                            <li><NavLink to="/marketplace" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">Marketplace</NavLink></li>
+                        }
                         {
                             account &&
                             <li><NavLink to="/my-tickets" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">My Tickets</NavLink></li>
