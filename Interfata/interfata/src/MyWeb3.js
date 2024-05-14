@@ -56,6 +56,20 @@ export async function getAccount(dispatch, setAccount, setBalance) {
     }
 }
 
+
+export async function getAccountBalance(dispatch, setBalance) {
+    if (window.ethereum) {
+        const web3 = new Web3(window.ethereum);
+        if (window.web3 && window.web3.eth) {
+            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+            const account = accounts[0];
+            const userBalance = await window.web3.eth.getBalance(account);
+            dispatch(setBalance(window.web3.utils.fromWei(userBalance, 'ether')));
+        }
+    }
+}
+
+
 export async function deleteAccount(dispatch, logout) {
     await disconnectFromMetamask();
     dispatch(logout());
@@ -106,5 +120,47 @@ export const createTicket = async (name, description, price) => {
         await ticketContract.methods.createTicket(name, description, price).send({ from: account });
     } catch (error) {
         console.error("Error creating ticket:", error);
+    }
+}
+
+
+export const placeTicketForSale = async (id, price) => {
+    try {
+        if (window.ethereum) {
+            const web3 = new Web3(window.ethereum);
+            const newPrice = web3.utils.toWei(price, 'ether');
+            await ticketContract.methods.placeTicketOnSale(parseInt(id), newPrice).send({ from: account });
+        }
+    } catch (error) {
+        console.error("Error placing ticket on sale:", error);
+    }
+}
+
+
+export const revokeTicketForSale = async (id) => {
+    try {
+        console.log(id);
+        await ticketContract.methods.revokeTicketFromSale(parseInt(id)).send({ from: account });
+    } catch (error) {
+        console.error("Error revoking ticket for sale:", error);
+    }
+}
+
+
+export const convertWeiToEther = (price) => {
+    return Web3.utils.fromWei(price, 'ether');
+}
+
+
+export const convertEtherToWei = (price) => {
+    return Web3.utils.toWei(price, 'ether');
+}
+
+
+export const buyTicket = async (id, price) => {
+    try {
+        await ticketContract.methods.buyTicket(id).send({ from: account, value: price });
+    } catch (error) {
+        console.error("Error buying ticket:", error);
     }
 }

@@ -6,7 +6,7 @@ import { useState } from "react";
 import { setChanges } from "../features/UserSlice";
 import { useDispatch } from "react-redux";
 
-const MyTickets = ({ accountArrayTickets, createTicket }) => {
+const MyTickets = ({ accountArrayTickets, createTicket, placeTicketForSale, revokeTicketForSale }) => {
     const dispatch = useDispatch();
     const [isOpen, setIsOpen] = useState(false);
     const { register, handleSubmit } = useForm();
@@ -31,9 +31,12 @@ const MyTickets = ({ accountArrayTickets, createTicket }) => {
                     <div className="w-full flex flex-col items-center justify-center gap-4">
                         <button type="button" onClick={togglePopup} class="w-[25%] text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">ADD TICKET</button>
                         {
-                            accountArrayTickets &&
+                            console.log(accountArrayTickets)
+                        }
+                        {
+                            accountArrayTickets && accountArrayTickets.length > 0 &&
                             accountArrayTickets.map((ticket, index) => (
-                                <TicketSell key={index} ticket={ticket} />
+                                <TicketSell key={index} ticket={ticket} placeTicketForSale={placeTicketForSale} revokeTicketForSale={revokeTicketForSale} />
                             ))
                         }
                         {

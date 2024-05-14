@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import Ticket from "../components/Ticket";
 
-const Marketplace = ({arrayTickets}) => {
+const Marketplace = ({arrayTickets, buyTicket}) => {
     return (
         <div className="absolute w-full h-full pt-32 flex justify-center px-24 py-12">
             <div className="w-full">
@@ -15,7 +15,7 @@ const Marketplace = ({arrayTickets}) => {
                             arrayTickets &&
                             arrayTickets.map((ticket, index) => (
                                 ticket.forSale &&
-                                <Ticket key={index} ticket={ticket} />
+                                <Ticket key={index} ticket={ticket} buyTicket={buyTicket} />
                             ))
                         }
                     </div>

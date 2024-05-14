@@ -1,7 +1,10 @@
 import React, { useState, useRef } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { setChanges } from "../features/UserSlice";
+import { useDispatch } from "react-redux";
 
-const TicketSell = ({ ticket }) => {
+const TicketSell = ({ ticket, placeTicketForSale, revokeTicketForSale }) => {
+    const dispatch = useDispatch();
     const [isOpen, setIsOpen] = useState(false);
     const [price, setPrice] = useState(null);
     const formRef = useRef();
@@ -13,8 +16,8 @@ const TicketSell = ({ ticket }) => {
     const { register, handleSubmit } = useForm();
 
     const onSubmit = async (data) => {
-        setPrice(data.price);
-        console.log(data);
+        await placeTicketForSale(ticket.id, data.price);
+        dispatch(setChanges());
         togglePopup();
     }
 
@@ -29,7 +32,7 @@ const TicketSell = ({ ticket }) => {
             <div className="flex-col flex h-full gap-2 min-w-fit">
                 {
                     ticket.forSale ?
-                        <button type="button" disabled={ticket.forSale} class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">FOR SALE</button>
+                        <button type="button" onClick={async () => {await revokeTicketForSale(ticket.id); dispatch(setChanges())}} class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">WITHDRAW FROM MARKETPLACE</button>
                         :
                         <button type="button" onClick={togglePopup} class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">SELL</button>
                 }
@@ -74,7 +77,7 @@ const TicketSell = ({ ticket }) => {
                                                         required
                                                         {...register("price")} />
                                                 </div>
-                                                <button type="submit" class="text-white bg-gradient-to-br w-full from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">BUY</button>
+                                                <button type="submit" class="text-white bg-gradient-to-br w-full from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">ADD</button>
                                             </form>
                                         </div>
                                     </div>
