@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import TicketSell from "../components/TicketSell";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -6,7 +6,7 @@ import { useState } from "react";
 import { setChanges } from "../features/UserSlice";
 import { useDispatch } from "react-redux";
 
-const MyTickets = ({ accountArrayTickets, createTicket, placeTicketForSale, revokeTicketForSale }) => {
+const MyTickets = ({ accountArrayTickets, createTicket, placeTicketForSale, revokeTicketForSale, startAuction }) => {
     const dispatch = useDispatch();
     const [isOpen, setIsOpen] = useState(false);
     const { register, handleSubmit } = useForm();
@@ -20,7 +20,7 @@ const MyTickets = ({ accountArrayTickets, createTicket, placeTicketForSale, revo
         togglePopup();
         dispatch(setChanges());
     }
-
+    
     return (
         <div className="absolute w-full h-full pt-32 flex justify-center px-24 py-12">
             <div className="w-full">
@@ -36,7 +36,7 @@ const MyTickets = ({ accountArrayTickets, createTicket, placeTicketForSale, revo
                         {
                             accountArrayTickets && accountArrayTickets.length > 0 &&
                             accountArrayTickets.map((ticket, index) => (
-                                <TicketSell key={index} ticket={ticket} placeTicketForSale={placeTicketForSale} revokeTicketForSale={revokeTicketForSale} />
+                                <TicketSell key={index} ticket={ticket} placeTicketForSale={placeTicketForSale} revokeTicketForSale={revokeTicketForSale} startAuction={startAuction} />
                             ))
                         }
                         {

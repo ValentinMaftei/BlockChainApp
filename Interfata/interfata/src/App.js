@@ -4,7 +4,9 @@ import Home from './pages/Home';
 import Marketplace from './pages/Marketplace';
 import MyTickets from './pages/MyTickets';
 import Sidebar from './components/Sidebar';
-import { getAccount, deleteAccount, loadContract, renderTickets, getAccountTickets, createTicket, getAccountBalance, placeTicketForSale, revokeTicketForSale, buyTicket } from './MyWeb3';
+import Auctions from './pages/Auctions';
+import MyBids from './pages/MyBids';
+import { getAccount, deleteAccount, loadContract, renderTickets, getAccountTickets, createTicket, getAccountBalance, placeTicketForSale, revokeTicketForSale, buyTicket, renderAuctions, startAuction } from './MyWeb3';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { login, logout, setBalance } from './features/UserSlice';
@@ -19,10 +21,12 @@ function App() {
 
   const [arrayTickets, setArrayTickets] = useState(null);
   const [accountArrayTickets, setAccountArrayTickets] = useState(null);
+  const [auctions, setAuctions] = useState(null);
 
   const initializeContracts = async () => {
     await loadContract();
     setArrayTickets(await renderTickets());
+    setAuctions(await renderAuctions());
   }
 
   const getAccountBalanceAfter = async () => {
@@ -50,7 +54,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Home account={account} onPressConnect={() => getAccount(dispatch, login, setBalance)} onPressDisconnect={() => deleteAccount(dispatch, logout, setBalance)} />} />
           <Route path="/marketplace" element={<Marketplace arrayTickets={arrayTickets} buyTicket={buyTicket} />} />
-          <Route path="/my-tickets" element={<MyTickets accountArrayTickets={accountArrayTickets} createTicket={createTicket} placeTicketForSale={placeTicketForSale} revokeTicketForSale={revokeTicketForSale} />} />
+          <Route path="/my-tickets" element={<MyTickets accountArrayTickets={accountArrayTickets} createTicket={createTicket} placeTicketForSale={placeTicketForSale} revokeTicketForSale={revokeTicketForSale} startAuction={startAuction} />} />
+          <Route path="/auctions" element={<Auctions auctions={auctions} />} />
+          <Route path="/my-bids" element={<MyBids />} />
         </Routes>
       </Router>
     </div>

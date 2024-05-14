@@ -24,7 +24,15 @@ const Sidebar = ({ balance, account }) => {
                         }
                         {
                             account &&
+                            <li><NavLink to="/auctions" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">Auctions</NavLink></li>
+                        }
+                        {
+                            account &&
                             <li><NavLink to="/my-tickets" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">My Tickets</NavLink></li>
+                        }
+                        {
+                            account &&
+                            <li><NavLink to="/my-bids" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">My Bids</NavLink></li>
                         }
                     </ul>
                     {

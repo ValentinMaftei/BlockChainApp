@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Web3 from 'web3';
 import Ticket from 'contracts/Ticket.json';
+import TicketAuction from 'contracts/TicketAuction.json';
+import Withdrawable from 'contracts/Withdrawable.json';
 import { logout } from './features/UserSlice';
 
 let account;
@@ -76,7 +78,7 @@ export async function deleteAccount(dispatch, logout) {
     window.location.reload();
 }
 
-let ticketContract;
+let ticketContract, ticketAuctionContract, withdrawableContract;
 
 export async function loadContract() {
     const web3 = new Web3(window.ethereum);
@@ -86,6 +88,16 @@ export async function loadContract() {
     ticketContract = new web3.eth.Contract(
         Ticket.abi,
         Ticket.networks[network].address
+    );
+
+    ticketAuctionContract = new web3.eth.Contract(
+        TicketAuction.abi,
+        TicketAuction.networks[network].address
+    );
+
+    withdrawableContract = new web3.eth.Contract(
+        Withdrawable.abi,
+        Withdrawable.networks[network].address
     );
 }
 
@@ -162,5 +174,45 @@ export const buyTicket = async (id, price) => {
         await ticketContract.methods.buyTicket(id).send({ from: account, value: price });
     } catch (error) {
         console.error("Error buying ticket:", error);
+    }
+}
+
+
+export const renderAuctions = async () => {
+    const auctionsCount = await ticketAuctionContract.methods.auctionCount().call();
+    const arrayAuctions = [];
+
+    for (let i = 1; i <= auctionsCount; i++) {
+        const auction = await ticketAuctionContract.methods.auctions(i).call();
+        if (auction.active)
+            arrayAuctions.push(auction);
+    }
+
+    return arrayAuctions;
+}
+
+
+export const getTicket = async (id) => {
+    return await ticketContract.methods.tickets(id).call();
+}
+
+
+export const startAuction = async (ticketId, price, deadline) => {
+    try {
+        await ticketAuctionContract.methods.startAuction(parseInt(ticketId), parseInt(price), deadline).send({ from: account });
+    } catch (error) {
+        console.error("Error starting auction:", error);
+    }
+}
+
+export const getAuctionByTicketId = async (id) => {
+    return await ticketAuctionContract.methods.getAuctionByTicketId(id).call();
+}
+
+export const endAuction = async (id) => {
+    try {
+        await ticketAuctionContract.methods.endAuction(parseInt(id)).send({ from: account });
+    } catch (error) {
+        console.error("Error ending auction:", error);
     }
 }

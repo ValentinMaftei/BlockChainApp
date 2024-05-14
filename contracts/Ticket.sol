@@ -78,18 +78,26 @@ contract Ticket {
         _;
     }
 
+    function updateTicketPrice(uint _id, uint _newPrice) private {
+        tickets[_id].price = _newPrice;
+    }
+
+    function getisTicketForSale(uint _id) public view returns (bool) {
+        return tickets[_id].forSale;
+    }
+
     function placeTicketOnSale(
         uint _id,
         uint _price
     ) external onlyTicketOwner(_id) {
         tickets[_id].forSale = true;
-        tickets[_id].price = _price;
+        updateTicketPrice(_id, _price);
         emit TicketPlaceOnSale(_id, _price, msg.sender);
     }
 
     function revokeTicketFromSale(uint _id) external onlyTicketOwner(_id) {
         tickets[_id].forSale = false;
-        tickets[_id].price = 0;
+        updateTicketPrice(_id, 0);
     }
 
     modifier isTicketForSale(uint _id) {
@@ -110,5 +118,21 @@ contract Ticket {
         tickets[_id].forSale = false;
         tickets[_id].price = 0;
         emit TicketBought(_id, msg.value, msg.sender);
+    }
+
+    function getTicket(uint _id) public view returns (string memory, string memory) {
+            return (tickets[_id].name, tickets[_id].description);
+
+    }
+
+    function getTicketOwner(uint _id) public view returns (address) {
+        return tickets[_id].owner;
+    }
+
+    event TicketTransferred(uint id, address payable newOwner);
+
+    function transferTicket(uint _id, address payable newOwner) public {
+        tickets[_id].owner = newOwner;
+        emit TicketTransferred(_id, newOwner);
     }
 }
