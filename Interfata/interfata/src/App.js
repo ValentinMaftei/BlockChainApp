@@ -24,10 +24,13 @@ function App() {
   const [auctions, setAuctions] = useState(null);
 
   const initializeContracts = async () => {
+    console.log("Initializing contracts");
     await loadContract();
     setArrayTickets(await renderTickets());
     setAuctions(await renderAuctions());
   }
+
+  console.log(auctions);
 
   const getAccountBalanceAfter = async () => {
     await getAccountBalance(dispatch, setBalance);

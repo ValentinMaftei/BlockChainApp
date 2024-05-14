@@ -34,7 +34,7 @@ const TicketSell = ({ ticket, placeTicketForSale, revokeTicketForSale, startAuct
         const deadline = new Date(data.deadline);
         const unixTimestamp = Math.floor(deadline.getTime() / 1000);
         data.deadline = unixTimestamp;
-        startAuction(ticket.id, convertEtherToWei(data.startingPrice), data.deadline);
+        await startAuction(ticket.id, convertEtherToWei(data.startingPrice), data.deadline);
         dispatch(setChanges());
         toggleAuctionPopup();
     }

@@ -10,6 +10,9 @@ const Auctions = ({ auctions }) => {
                     <div className="title"></div>
                     <br />
                     <div className="w-full flex flex-col justify-center gap-4">
+                    {
+                        console.log(auctions)
+                    }
                         {
                             auctions &&
                             auctions.length > 0 &&

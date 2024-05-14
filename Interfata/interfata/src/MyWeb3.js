@@ -206,12 +206,12 @@ export const startAuction = async (ticketId, price, deadline) => {
 }
 
 export const getAuctionByTicketId = async (id) => {
-    return await ticketAuctionContract.methods.getAuctionByTicketId(id).call();
+    return await ticketAuctionContract.methods.getAuctionByTicketId(parseInt(id)).call();
 }
 
 export const endAuction = async (id) => {
     try {
-        await ticketAuctionContract.methods.endAuction(parseInt(id)).send({ from: account });
+        await ticketAuctionContract.methods.endAuction(id).send({ from: account });
     } catch (error) {
         console.error("Error ending auction:", error);
     }
