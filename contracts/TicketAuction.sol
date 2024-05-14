@@ -67,12 +67,7 @@ contract TicketAuction is Withdrawable {
 
     function bid(
         uint _ticketId
-    )
-        public
-        payable
-        isAuctionActive(_ticketId)
-        isBidHighEnough(_ticketId)
-    {
+    ) public payable isAuctionActive(_ticketId) isBidHighEnough(_ticketId) {
         // Refund the previous highest bidder
         if (auctions[_ticketId].highestBidder != address(0)) {
             pendingReturns[auctions[_ticketId].highestBidder] += auctions[
@@ -88,10 +83,15 @@ contract TicketAuction is Withdrawable {
 
     function endAuction(uint _ticketId) public {
         for (uint i = 1; i <= auctionCount; i++) {
-            if (auctions[i].ticketId == _ticketId) {
+            if (auctions[i].ticketId == _ticketId && auctions[i].active) {
                 if (auctions[i].highestBidder == address(0)) {
                     // No bids were placed
                     auctions[i].active = false;
+                    emit AuctionEnded(
+                        _ticketId,
+                        auctions[i].highestBidder,
+                        auctions[i].highestBid
+                    );
                     return;
                 }
                 // Transfer the ticket to the winner
