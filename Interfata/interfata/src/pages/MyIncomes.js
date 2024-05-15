@@ -6,7 +6,7 @@ import { useState } from "react";
 import { setChanges } from "../features/UserSlice";
 import { useDispatch } from "react-redux";
 
-const MyBids = ({ auctionBids }) => {
+const MyIncomes = ({ auctionBids }) => {
     const dispatch = useDispatch();
     const [isOpen, setIsOpen] = useState(false);
     const { register, handleSubmit } = useForm();
@@ -23,7 +23,7 @@ const MyBids = ({ auctionBids }) => {
         <div className="absolute w-full h-full pt-32 flex justify-center px-24 py-12">
             <div className="w-full">
                 <div className="w-full">
-                    <h1 className="tracking-widest text-[40px] text-center uppercase">My Tickets</h1>
+                    <h1 className="tracking-widest text-[40px] text-center uppercase">My Incomes</h1>
                     <div className="title"></div>
                     <br />
                     <div className="w-full flex flex-col items-center justify-center gap-4">
@@ -40,4 +40,4 @@ const MyBids = ({ auctionBids }) => {
     );
 }
 
-export default MyBids;
+export default MyIncomes;

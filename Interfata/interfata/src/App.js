@@ -5,7 +5,7 @@ import Marketplace from './pages/Marketplace';
 import MyTickets from './pages/MyTickets';
 import Sidebar from './components/Sidebar';
 import Auctions from './pages/Auctions';
-import MyBids from './pages/MyBids';
+import MyIncomes from './pages/MyIncomes';
 import { getAccount, deleteAccount, loadContract, renderTickets, getAccountTickets, createTicket, getAccountBalance, placeTicketForSale, revokeTicketForSale, buyTicket, renderAuctions, startAuction } from './MyWeb3';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -29,8 +29,6 @@ function App() {
     setArrayTickets(await renderTickets());
     setAuctions(await renderAuctions());
   }
-
-  console.log(auctions);
 
   const getAccountBalanceAfter = async () => {
     await getAccountBalance(dispatch, setBalance);
@@ -59,7 +57,7 @@ function App() {
           <Route path="/marketplace" element={<Marketplace arrayTickets={arrayTickets} buyTicket={buyTicket} />} />
           <Route path="/my-tickets" element={<MyTickets accountArrayTickets={accountArrayTickets} createTicket={createTicket} placeTicketForSale={placeTicketForSale} revokeTicketForSale={revokeTicketForSale} startAuction={startAuction} />} />
           <Route path="/auctions" element={<Auctions auctions={auctions} />} />
-          <Route path="/my-bids" element={<MyBids />} />
+          <Route path="/my-incomes" element={<MyIncomes />} />
         </Routes>
       </Router>
     </div>

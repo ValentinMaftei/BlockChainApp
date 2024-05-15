@@ -32,7 +32,7 @@ const Sidebar = ({ balance, account }) => {
                         }
                         {
                             account &&
-                            <li><NavLink to="/my-bids" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">My Bids</NavLink></li>
+                            <li><NavLink to="/my-incomes" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">My Incomes</NavLink></li>
                         }
                     </ul>
                     {

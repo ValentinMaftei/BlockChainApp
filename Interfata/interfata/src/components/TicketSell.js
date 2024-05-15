@@ -31,10 +31,7 @@ const TicketSell = ({ ticket, placeTicketForSale, revokeTicketForSale, startAuct
     }
 
     const onSubmitAuction = async (data) => {
-        const deadline = new Date(data.deadline);
-        const unixTimestamp = Math.floor(deadline.getTime() / 1000);
-        data.deadline = unixTimestamp;
-        await startAuction(ticket.id, convertEtherToWei(data.startingPrice), data.deadline);
+        await startAuction(ticket.id, convertEtherToWei(data.startingPrice));
         dispatch(setChanges());
         toggleAuctionPopup();
     }
@@ -108,7 +105,8 @@ const TicketSell = ({ ticket, placeTicketForSale, revokeTicketForSale, startAuct
                                                         type="number"
                                                         name="price"
                                                         id="price"
-                                                        min="0.1"
+                                                        min="0.00001"
+                                                        step="0.00001"
                                                         placeholder="e.g. 0.1 ETH"
                                                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-500 dark:placeholder-gray-600 dark:text-black"
                                                         required
@@ -157,22 +155,12 @@ const TicketSell = ({ ticket, placeTicketForSale, revokeTicketForSale, startAuct
                                                         type="number"
                                                         name="startingPrice"
                                                         id="startingPrice"
-                                                        min="0.1"
+                                                        min="0.00001"
+                                                        step="0.00001"
                                                         placeholder="e.g. 0.1 ETH"
                                                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-500 dark:placeholder-gray-600 dark:text-black"
                                                         required
                                                         {...auctionRegister("startingPrice")} />
-                                                </div>
-                                                <div>
-                                                    <label for="deadline" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">The initial price at which you want to start the auction.</label>
-                                                    <input
-                                                        type="datetime-local"
-                                                        name="deadline"
-                                                        id="deadline"
-                                                        min={new Date().toISOString().split('T')[0]}
-                                                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-500 dark:placeholder-gray-600 dark:text-black"
-                                                        required
-                                                        {...auctionRegister("deadline")} />
                                                 </div>
                                                 <button type="submit" class="text-white bg-gradient-to-br w-full from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">ADD</button>
                                             </form>

@@ -122,7 +122,6 @@ export const getAccountTickets = async (account) => {
         tickets.push(ticket);
     }
 
-    console.log(tickets);
     return tickets;
 }
 
@@ -151,7 +150,6 @@ export const placeTicketForSale = async (id, price) => {
 
 export const revokeTicketForSale = async (id) => {
     try {
-        console.log(id);
         await ticketContract.methods.revokeTicketFromSale(parseInt(id)).send({ from: account });
     } catch (error) {
         console.error("Error revoking ticket for sale:", error);
@@ -171,7 +169,7 @@ export const convertEtherToWei = (price) => {
 
 export const buyTicket = async (id, price) => {
     try {
-        await ticketContract.methods.buyTicket(id).send({ from: account, value: price });
+        await ticketContract.methods.buyTicket(id).send({ from: account, value: parseFloat(price) });
     } catch (error) {
         console.error("Error buying ticket:", error);
     }
@@ -197,9 +195,9 @@ export const getTicket = async (id) => {
 }
 
 
-export const startAuction = async (ticketId, price, deadline) => {
+export const startAuction = async (ticketId, price) => {
     try {
-        await ticketAuctionContract.methods.startAuction(parseInt(ticketId), parseInt(price), deadline).send({ from: account });
+        await ticketAuctionContract.methods.startAuction(parseInt(ticketId), parseInt(price)).send({ from: account });
     } catch (error) {
         console.error("Error starting auction:", error);
     }
@@ -215,4 +213,25 @@ export const endAuction = async (id) => {
     } catch (error) {
         console.error("Error ending auction:", error);
     }
+}
+
+export const placeBid = async (id, price) => {
+    try {
+        const priceInWei = Web3.utils.toWei(Number(price).toFixed(18), 'ether');
+        await ticketAuctionContract.methods.placeBid(parseInt(id)).send({ from: account, value: priceInWei });
+    } catch (error) {
+        console.error("Error placing bid:", error);
+    }
+}
+
+export const getBidsByAuctionId = async (id) => {
+    const result = await ticketAuctionContract.methods.getBidsByAuctionId(id).call();
+    const bidsToGet = result[0].map((price, index) => {
+        return {
+            bidder: result[1][index],
+            price: Web3.utils.fromWei(price.toString(), 'ether')
+        }
+    });
+    bidsToGet.sort((a, b) => b.price - a.price);
+    return bidsToGet;
 }

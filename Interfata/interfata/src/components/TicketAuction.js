@@ -2,24 +2,21 @@ import React, { useState, useRef, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { setChanges } from "../features/UserSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { getTicket } from "../MyWeb3";
+import { getBidsByAuctionId, getTicket, placeBid } from "../MyWeb3";
+import { convertWeiToEther } from "../MyWeb3";
 
 const TicketAuction = ({ auction }) => {
     const dispatch = useDispatch();
 
     const account = useSelector(state => state.user.id);
+    const changes = useSelector(state => state.user.changes);
 
     const [isOpen, setIsOpen] = useState(false);
     const [price, setPrice] = useState(null);
     const [ticket, setTicket] = useState(null);
+    const [bids, setBids] = useState(null);
 
     const formRef = useRef();
-    const bids = [
-        {
-            price: 0.1,
-            bidder: "0x1234...5678"
-        }
-    ]
 
     const togglePopup = () => {
         setIsOpen(!isOpen);
@@ -28,16 +25,18 @@ const TicketAuction = ({ auction }) => {
     const { register, handleSubmit } = useForm();
 
     const onSubmit = async (data) => {
-        console.log(data);
+        await placeBid(auction.id, data.price);
+        dispatch(setChanges());
     }
 
     const getInfoTicket = async () => {
         setTicket(await getTicket(auction.ticketId));
+        setBids(await getBidsByAuctionId(auction.id));
     }
 
     useEffect(() => {
         getInfoTicket();
-    }, []);
+    }, [changes]);
 
     return (
         ticket &&
@@ -46,6 +45,7 @@ const TicketAuction = ({ auction }) => {
             <div className="w-full flex flex-col justify-between p-4 leading-normal">
                 <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{ticket.name}</h5>
                 <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{ticket.description}</p>
+                <p className="mb-3 font-normal text-gray-700 dark:text-gray-200">{auction.highestBid === auction.startPrice ? 'Starting' : 'Highest'} bid: {parseFloat(convertWeiToEther(auction.highestBid)).toFixed(5)} ETH</p>
             </div>
             <div className="flex-col flex h-full gap-2 min-w-fit">
                 <button type="button" onClick={togglePopup} class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">VIEW AUCTION</button>
@@ -73,9 +73,10 @@ const TicketAuction = ({ auction }) => {
                                             <div className="w-full flex flex-col justify-between p-4 leading-normal">
                                                 <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{ticket.name}</h5>
                                                 <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{ticket.description}</p>
+                                                <p className="mb-3 font-normal text-gray-700 dark:text-gray-200">{auction.highestBid === auction.startPrice ? 'Starting' : 'Highest'} bid: {parseFloat(convertWeiToEther(auction.highestBid)).toFixed(5)} ETH</p>
                                             </div>
                                             {
-                                                auction.highestBidder !== account
+                                                !bids.some(bid => bid.bidder === account)
                                                     ? <form className="w-[40%] space-y-4" onSubmit={handleSubmit(onSubmit)}>
                                                         <div>
                                                             <label for="price" className="block mb-2 font-medium text-gray-900 dark:text-white">Enter bid value</label>
@@ -83,7 +84,8 @@ const TicketAuction = ({ auction }) => {
                                                                 type="number"
                                                                 name="price"
                                                                 id="price"
-                                                                min="0.1"
+                                                                step="0.00001"
+                                                                min={convertWeiToEther(parseInt(auction.highestBid) + 10000000000000)}
                                                                 placeholder="e.g. 0.1 ETH"
                                                                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-500 dark:placeholder-gray-600 dark:text-black"
                                                                 required
@@ -91,7 +93,7 @@ const TicketAuction = ({ auction }) => {
                                                         </div>
                                                         <button type="submit" class="text-white bg-gradient-to-br w-full from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">PLACE BID</button>
                                                     </form>
-                                                    : <button class="w-[40%] text-white bg-gradient-to-br w-full from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">WITHDRAW</button>
+                                                    : <button class="w-[40%] text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">WITHDRAW</button>
                                             }
                                         </div>
                                         <br />
@@ -108,7 +110,7 @@ const TicketAuction = ({ auction }) => {
                                                                     </span>
                                                                 }
                                                             </div>
-                                                            <span className="text-2xl text-gray-700 dark:text-white">Value: {bid.price} ETH</span>
+                                                            <span className="text-2xl text-gray-700 dark:text-white">Value: {parseFloat(bid.price).toFixed(5)} ETH</span>
                                                         </div>
                                                     </div>
                                                 ))

@@ -16,8 +16,14 @@ contract TicketAuction is Withdrawable {
         address payable highestBidder;
         uint ticketId;
         bool active;
-        uint deadline; // Deadline as a UNIX timestamp
     }
+
+    struct Bid {
+        uint value;
+        address payable bidder;
+    }
+
+    mapping(uint => Bid[]) public auctionBids;
 
     mapping(uint => Auction) public auctions;
 
@@ -31,22 +37,16 @@ contract TicketAuction is Withdrawable {
     }
 
     modifier isBidHighEnough(uint _id) {
-        require(msg.value > auctions[_id].highestBid, "Bid is not high enough");
+        require(
+            msg.value >= auctions[_id].highestBid + 10000000000000,
+            "Bid is not high enough"
+        );
         _;
     }
 
-    event AuctionStarted(
-        uint auctionId,
-        uint ticketId,
-        uint startPrice,
-        uint duration
-    );
+    event AuctionStarted(uint auctionId, uint ticketId, uint startPrice);
 
-    function startAuction(
-        uint _ticketId,
-        uint _startPrice,
-        uint _duration
-    ) public {
+    function startAuction(uint _ticketId, uint _startPrice) public {
         // Start the auction
         auctionCount++;
         auctions[auctionCount] = Auction(
@@ -55,15 +55,13 @@ contract TicketAuction is Withdrawable {
             _startPrice, // Highest bid is the start price
             address(0),
             _ticketId,
-            true,
-            _duration
+            true
         );
-        emit AuctionStarted(auctionCount, _ticketId, _startPrice, _duration);
+        emit AuctionStarted(auctionCount, _ticketId, _startPrice);
     }
 
-    event BidPlaced(uint ticketId, address bidder, uint amount);
 
-    event AuctionEnded(uint ticketId, address winner, uint amount);
+    event AuctionEnd(uint ticketId, address winner, uint amount);
 
     function bid(
         uint _ticketId
@@ -87,7 +85,7 @@ contract TicketAuction is Withdrawable {
                 if (auctions[i].highestBidder == address(0)) {
                     // No bids were placed
                     auctions[i].active = false;
-                    emit AuctionEnded(
+                    emit AuctionEnd(
                         _ticketId,
                         auctions[i].highestBidder,
                         auctions[i].highestBid
@@ -105,7 +103,7 @@ contract TicketAuction is Withdrawable {
                 ] += auctions[i].highestBid;
                 // End the auction
                 auctions[i].active = false;
-                emit AuctionEnded(
+                emit AuctionEnd(
                     _ticketId,
                     auctions[i].highestBidder,
                     auctions[i].highestBid
@@ -121,5 +119,42 @@ contract TicketAuction is Withdrawable {
             }
         }
         return false;
+    }
+
+    event BidPlaced(uint auctionId, address bidder, uint value);
+
+    function placeBid(
+        uint _auctionId
+    ) public payable isAuctionActive(_auctionId) isBidHighEnough(_auctionId) {
+        // Push the bid to the auction's bids array
+        auctionBids[_auctionId].push(Bid(msg.value, msg.sender));
+
+        if (auctions[_auctionId].highestBidder != address(0)) {
+            pendingReturns[auctions[_auctionId].highestBidder] += auctions[
+                _auctionId
+            ].highestBid;
+        }
+
+        // Update the highest bid and bidder
+        auctions[_auctionId].highestBid = msg.value;
+        auctions[_auctionId].highestBidder = msg.sender;
+
+        emit BidPlaced(_auctionId, msg.sender, msg.value);
+    }
+
+    function getBidsByAuctionId(uint _auctionId)
+        public
+        view
+        returns (uint[] memory, address[] memory)
+    {
+        uint[] memory values = new uint[](auctionBids[_auctionId].length);
+        address[] memory bidders = new address[](auctionBids[_auctionId].length);
+
+        for (uint i = 0; i < auctionBids[_auctionId].length; i++) {
+            values[i] = auctionBids[_auctionId][i].value;
+            bidders[i] = auctionBids[_auctionId][i].bidder;
+        }
+
+        return (values, bidders);
     }
 }
