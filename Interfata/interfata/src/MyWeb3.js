@@ -126,21 +126,21 @@ export const getAccountTickets = async (account) => {
 }
 
 
-export const createTicket = async (name, description, price) => {
+export const createTicket = async (name, description, acc) => {
     try {
-        await ticketContract.methods.createTicket(name, description, price).send({ from: account });
+        await ticketContract.methods.createTicket(name, description).send({ from: acc });
     } catch (error) {
         console.error("Error creating ticket:", error);
     }
 }
 
 
-export const placeTicketForSale = async (id, price) => {
+export const placeTicketForSale = async (id, price, acc) => {
     try {
         if (window.ethereum) {
             const web3 = new Web3(window.ethereum);
             const newPrice = web3.utils.toWei(price, 'ether');
-            await ticketContract.methods.placeTicketOnSale(parseInt(id), newPrice).send({ from: account });
+            await ticketContract.methods.placeTicketOnSale(parseInt(id), newPrice).send({ from: acc });
         }
     } catch (error) {
         console.error("Error placing ticket on sale:", error);
@@ -148,9 +148,9 @@ export const placeTicketForSale = async (id, price) => {
 }
 
 
-export const revokeTicketForSale = async (id) => {
+export const revokeTicketForSale = async (id, acc) => {
     try {
-        await ticketContract.methods.revokeTicketFromSale(parseInt(id)).send({ from: account });
+        await ticketContract.methods.revokeTicketFromSale(parseInt(id)).send({ from: acc });
     } catch (error) {
         console.error("Error revoking ticket for sale:", error);
     }
@@ -167,9 +167,9 @@ export const convertEtherToWei = (price) => {
 }
 
 
-export const buyTicket = async (id, price) => {
+export const buyTicket = async (id, price, acc) => {
     try {
-        await ticketContract.methods.buyTicket(id).send({ from: account, value: parseFloat(price) });
+        await ticketContract.methods.buyTicket(id).send({ from: acc, value: parseFloat(price) });
     } catch (error) {
         console.error("Error buying ticket:", error);
     }
@@ -195,9 +195,9 @@ export const getTicket = async (id) => {
 }
 
 
-export const startAuction = async (ticketId, price) => {
+export const startAuction = async (ticketId, price, acc) => {
     try {
-        await ticketAuctionContract.methods.startAuction(parseInt(ticketId), parseInt(price)).send({ from: account });
+        await ticketAuctionContract.methods.startAuction(parseInt(ticketId), parseInt(price)).send({ from: acc });
     } catch (error) {
         console.error("Error starting auction:", error);
     }
@@ -207,18 +207,18 @@ export const getAuctionByTicketId = async (id) => {
     return await ticketAuctionContract.methods.getAuctionByTicketId(parseInt(id)).call();
 }
 
-export const endAuction = async (id) => {
+export const endAuction = async (id, acc) => {
     try {
-        await ticketAuctionContract.methods.endAuction(id).send({ from: account });
+        await ticketAuctionContract.methods.endAuction(id).send({ from: acc });
     } catch (error) {
         console.error("Error ending auction:", error);
     }
 }
 
-export const placeBid = async (id, price) => {
+export const placeBid = async (id, price, acc) => {
     try {
         const priceInWei = Web3.utils.toWei(Number(price).toFixed(18), 'ether');
-        await ticketAuctionContract.methods.placeBid(parseInt(id)).send({ from: account, value: priceInWei });
+        await ticketAuctionContract.methods.placeBid(parseInt(id)).send({ from: acc, value: priceInWei });
     } catch (error) {
         console.error("Error placing bid:", error);
     }
@@ -234,4 +234,38 @@ export const getBidsByAuctionId = async (id) => {
     });
     bidsToGet.sort((a, b) => b.price - a.price);
     return bidsToGet;
+}
+
+
+export const withdraw = async (acc, auctionId) => {
+    try {
+        const result = await ticketAuctionContract.methods.withdraw(auctionId).send({ from: acc });
+        console.log("WITHDERAW", result);
+    } catch (error) {
+        console.error("Error withdrawing:", error);
+    }
+}
+
+
+export const checkPendingReturns = async (auctionId, acc) => {
+    const pendingReturn = await ticketAuctionContract.methods.checkPendingReturns(auctionId, acc).call();
+    return pendingReturn;
+}
+
+
+export const getTotalValuePendingReturns = async (acc) => {
+    console.log("Account:", acc);
+    const totalValue = await ticketAuctionContract.methods.getTotalValuePendingReturns(acc).call();
+    console.log("Total value:", totalValue);
+    return totalValue;
+}
+
+
+export const withdrawAll = async (acc) => {
+    try {
+        console.log(acc);
+        await ticketAuctionContract.methods.withdrawAllReturns(acc).send({ from: acc });
+    } catch (error) {
+        console.error("Error withdrawing all:", error);
+    }
 }

@@ -60,56 +60,43 @@ contract TicketAuction is Withdrawable {
         emit AuctionStarted(auctionCount, _ticketId, _startPrice);
     }
 
+    event AuctionEnd(uint auctionId, address winner, uint amount);
 
-    event AuctionEnd(uint ticketId, address winner, uint amount);
+    function endAuction(uint _auctionId) public {
+        require(auctions[_auctionId].active, "Auction is not active");
 
-    function bid(
-        uint _ticketId
-    ) public payable isAuctionActive(_ticketId) isBidHighEnough(_ticketId) {
-        // Refund the previous highest bidder
-        if (auctions[_ticketId].highestBidder != address(0)) {
-            pendingReturns[auctions[_ticketId].highestBidder] += auctions[
-                _ticketId
-            ].highestBid;
+        if (auctions[_auctionId].highestBidder == address(0)) {
+            // No bids were placed
+            auctions[_auctionId].active = false;
+            emit AuctionEnd(
+                _auctionId,
+                auctions[_auctionId].highestBidder,
+                auctions[_auctionId].highestBid
+            );
+            return;
         }
 
-        // Update the highest bid
-        auctions[_ticketId].highestBid = msg.value;
-        auctions[_ticketId].highestBidder = msg.sender;
-        emit BidPlaced(_ticketId, msg.sender, msg.value);
-    }
+        
+        // Transfer the funds to the seller
+        pendingReturns[_auctionId][
+            ticketContract.getTicketOwner(auctions[_auctionId].ticketId)
+        ] += auctions[_auctionId].highestBid;
 
-    function endAuction(uint _ticketId) public {
-        for (uint i = 1; i <= auctionCount; i++) {
-            if (auctions[i].ticketId == _ticketId && auctions[i].active) {
-                if (auctions[i].highestBidder == address(0)) {
-                    // No bids were placed
-                    auctions[i].active = false;
-                    emit AuctionEnd(
-                        _ticketId,
-                        auctions[i].highestBidder,
-                        auctions[i].highestBid
-                    );
-                    return;
-                }
-                // Transfer the ticket to the winner
-                ticketContract.transferTicket(
-                    _ticketId,
-                    auctions[i].highestBidder
-                );
-                // Transfer the funds to the seller
-                pendingReturns[
-                    ticketContract.getTicketOwner(_ticketId)
-                ] += auctions[i].highestBid;
-                // End the auction
-                auctions[i].active = false;
-                emit AuctionEnd(
-                    _ticketId,
-                    auctions[i].highestBidder,
-                    auctions[i].highestBid
-                );
-            }
-        }
+
+        // Transfer the ticket to the winner
+        ticketContract.transferTicket(
+            auctions[_auctionId].ticketId,
+            auctions[_auctionId].highestBidder
+        );
+
+
+        // End the auction
+        auctions[_auctionId].active = false;
+        emit AuctionEnd(
+            _auctionId,
+            auctions[_auctionId].highestBidder,
+            auctions[_auctionId].highestBid
+        );
     }
 
     function getAuctionByTicketId(uint _ticketId) public view returns (bool) {
@@ -130,9 +117,10 @@ contract TicketAuction is Withdrawable {
         auctionBids[_auctionId].push(Bid(msg.value, msg.sender));
 
         if (auctions[_auctionId].highestBidder != address(0)) {
-            pendingReturns[auctions[_auctionId].highestBidder] += auctions[
-                _auctionId
-            ].highestBid;
+            // Update the pending returns for the previous highest bidder
+            pendingReturns[_auctionId][
+                auctions[_auctionId].highestBidder
+            ] += auctions[_auctionId].highestBid;
         }
 
         // Update the highest bid and bidder
@@ -142,13 +130,13 @@ contract TicketAuction is Withdrawable {
         emit BidPlaced(_auctionId, msg.sender, msg.value);
     }
 
-    function getBidsByAuctionId(uint _auctionId)
-        public
-        view
-        returns (uint[] memory, address[] memory)
-    {
+    function getBidsByAuctionId(
+        uint _auctionId
+    ) public view returns (uint[] memory, address[] memory) {
         uint[] memory values = new uint[](auctionBids[_auctionId].length);
-        address[] memory bidders = new address[](auctionBids[_auctionId].length);
+        address[] memory bidders = new address[](
+            auctionBids[_auctionId].length
+        );
 
         for (uint i = 0; i < auctionBids[_auctionId].length; i++) {
             values[i] = auctionBids[_auctionId][i].value;
@@ -156,5 +144,35 @@ contract TicketAuction is Withdrawable {
         }
 
         return (values, bidders);
+    }
+
+
+    function checkPendingReturns(uint _auctionId, address account) public view returns (bool) {
+        return pendingReturns[_auctionId][account] > 0;
+    }
+
+    function getTotalValuePendingReturns (address account) public view returns (uint) {
+        uint total = 0;
+        for (uint i = 1; i <= auctionCount; i++) {
+            if (!auctions[i].active){
+                total += pendingReturns[i][account];
+            }
+        }
+        return total;
+    }
+
+    event WithdrawAllReturns(uint auctionId, address account, uint amount);
+
+    function withdrawAllReturns(address payable account) public {
+        for (uint i = 1; i <= auctionCount; i++) {
+            if (!auctions[i].active && pendingReturns[i][account] > 0) {
+                uint amount = pendingReturns[i][account];
+                pendingReturns[i][account] = 0;
+    
+                account.transfer(amount);
+            }
+        }
+
+        emit WithdrawAllReturns(auctionCount, account, pendingReturns[auctionCount][account]);
     }
 }

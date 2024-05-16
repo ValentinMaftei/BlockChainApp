@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { setChanges } from "../features/UserSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { getBidsByAuctionId, getTicket, placeBid } from "../MyWeb3";
+import { checkPendingReturns, getBidsByAuctionId, getTicket, placeBid, withdraw } from "../MyWeb3";
 import { convertWeiToEther } from "../MyWeb3";
 
 const TicketAuction = ({ auction }) => {
@@ -15,6 +15,7 @@ const TicketAuction = ({ auction }) => {
     const [price, setPrice] = useState(null);
     const [ticket, setTicket] = useState(null);
     const [bids, setBids] = useState(null);
+    const [hasFundsInBid, setHasFundsInBid] = useState(null);
 
     const formRef = useRef();
 
@@ -25,13 +26,19 @@ const TicketAuction = ({ auction }) => {
     const { register, handleSubmit } = useForm();
 
     const onSubmit = async (data) => {
-        await placeBid(auction.id, data.price);
+        await placeBid(auction.id, data.price, account);
         dispatch(setChanges());
     }
 
     const getInfoTicket = async () => {
         setTicket(await getTicket(auction.ticketId));
         setBids(await getBidsByAuctionId(auction.id));
+        setHasFundsInBid(await checkPendingReturns(auction.id, account))
+    }
+
+    const handleWithdraw = async () => {
+        await withdraw(account, auction.id)
+        dispatch(setChanges());
     }
 
     useEffect(() => {
@@ -76,8 +83,13 @@ const TicketAuction = ({ auction }) => {
                                                 <p className="mb-3 font-normal text-gray-700 dark:text-gray-200">{auction.highestBid === auction.startPrice ? 'Starting' : 'Highest'} bid: {parseFloat(convertWeiToEther(auction.highestBid)).toFixed(5)} ETH</p>
                                             </div>
                                             {
-                                                !bids.some(bid => bid.bidder === account)
-                                                    ? <form className="w-[40%] space-y-4" onSubmit={handleSubmit(onSubmit)}>
+                                                !hasFundsInBid === true
+                                                    ? auction.highestBidder === account 
+                                                    ? <div className="bg-dark-purple/[0.65] p-4 rounded-xl flex justify-center items-center">
+                                                        <img src="./warning.png" className="w-8 h-8"></img>
+                                                        <h5 className="text-center text-2xl text-gray-700 dark:text-white">You cannot withdraw as long as you are the highest bidder.</h5>
+                                                    </div>
+                                                    : (<form className="w-[40%] space-y-4" onSubmit={handleSubmit(onSubmit)}>
                                                         <div>
                                                             <label for="price" className="block mb-2 font-medium text-gray-900 dark:text-white">Enter bid value</label>
                                                             <input
@@ -92,8 +104,8 @@ const TicketAuction = ({ auction }) => {
                                                                 {...register("price")} />
                                                         </div>
                                                         <button type="submit" class="text-white bg-gradient-to-br w-full from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">PLACE BID</button>
-                                                    </form>
-                                                    : <button class="w-[40%] text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">WITHDRAW</button>
+                                                    </form>)
+                                                    : <button onClick={() => handleWithdraw()} class="w-[40%] text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">WITHDRAW</button>
                                             }
                                         </div>
                                         <br />

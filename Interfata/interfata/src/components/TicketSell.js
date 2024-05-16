@@ -10,7 +10,10 @@ const TicketSell = ({ ticket, placeTicketForSale, revokeTicketForSale, startAuct
     const [auctionIsOpen, setAuctionIsOpen] = useState(false);
     const [price, setPrice] = useState(null);
     const [isInAuction, setIsInAuction] = useState(false);
+
     const changes = useSelector(state => state.user.changes);
+    const account = useSelector(state => state.user.id);
+
     const formRef = useRef();
 
     const togglePopup = () => {
@@ -25,13 +28,14 @@ const TicketSell = ({ ticket, placeTicketForSale, revokeTicketForSale, startAuct
     const { register: auctionRegister, handleSubmit: auctionHandleSubmit } = useForm();
 
     const onSubmit = async (data) => {
-        await placeTicketForSale(ticket.id, data.price);
+        await placeTicketForSale(ticket.id, data.price, account);
         dispatch(setChanges());
         togglePopup();
     }
 
     const onSubmitAuction = async (data) => {
-        await startAuction(ticket.id, convertEtherToWei(data.startingPrice));
+        console.log("heeeere ", account);
+        await startAuction(ticket.id, convertEtherToWei(data.startingPrice), account);
         dispatch(setChanges());
         toggleAuctionPopup();
     }
@@ -58,7 +62,7 @@ const TicketSell = ({ ticket, placeTicketForSale, revokeTicketForSale, startAuct
                     !ticket.forSale &&
                     (
                         isInAuction
-                            ? <button type="button" onClick={async () => { await endAuction(ticket.id); dispatch(setChanges())}} class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">CLOSE AUCTION</button>
+                            ? <button type="button" onClick={async () => { await endAuction(ticket.id, account); dispatch(setChanges())}} class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">CLOSE AUCTION</button>
                             : <button type="button" onClick={toggleAuctionPopup} class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">INITIATE ACTION</button>
 
                     )
@@ -66,7 +70,7 @@ const TicketSell = ({ ticket, placeTicketForSale, revokeTicketForSale, startAuct
                 {
                     !isInAuction && (
                         ticket.forSale
-                            ? <button type="button" onClick={async () => { await revokeTicketForSale(ticket.id); dispatch(setChanges()) }} class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">WITHDRAW FROM MARKETPLACE</button>
+                            ? <button type="button" onClick={async () => { await revokeTicketForSale(ticket.id, account); dispatch(setChanges()) }} class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">WITHDRAW FROM MARKETPLACE</button>
                             : <button type="button" onClick={togglePopup} class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">SELL</button>
                     )
                 }

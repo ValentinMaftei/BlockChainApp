@@ -6,7 +6,7 @@ import MyTickets from './pages/MyTickets';
 import Sidebar from './components/Sidebar';
 import Auctions from './pages/Auctions';
 import MyIncomes from './pages/MyIncomes';
-import { getAccount, deleteAccount, loadContract, renderTickets, getAccountTickets, createTicket, getAccountBalance, placeTicketForSale, revokeTicketForSale, buyTicket, renderAuctions, startAuction } from './MyWeb3';
+import { getAccount, deleteAccount, loadContract, renderTickets, getTotalValuePendingReturns, getAccountTickets, createTicket, getAccountBalance, placeTicketForSale, revokeTicketForSale, buyTicket, renderAuctions, startAuction } from './MyWeb3';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { login, logout, setBalance } from './features/UserSlice';
@@ -22,6 +22,7 @@ function App() {
   const [arrayTickets, setArrayTickets] = useState(null);
   const [accountArrayTickets, setAccountArrayTickets] = useState(null);
   const [auctions, setAuctions] = useState(null);
+  const [totalMoney, setTotalMoney] = useState(null);
 
   const initializeContracts = async () => {
     console.log("Initializing contracts");
@@ -33,12 +34,17 @@ function App() {
   const getAccountBalanceAfter = async () => {
     await getAccountBalance(dispatch, setBalance);
   }
+  
+  const handleTotalValue = async () => {
+    setTotalMoney(await getTotalValuePendingReturns(account));
+  }
 
   useEffect(() => {
     initializeContracts().then((response) => {
       if (account) {
         handleGetAccountTickets();
         getAccountBalanceAfter();
+        handleTotalValue();
       }
     });
 
@@ -51,13 +57,13 @@ function App() {
   return (
     <div className=" background relative w-screen h-screen overflow-x-hidden">
       <Router>
-        <Sidebar balance={balance} account={account} />
+        <Sidebar balance={balance} account={account} totalMoney={totalMoney} />
         <Routes>
           <Route path="/" element={<Home account={account} onPressConnect={() => getAccount(dispatch, login, setBalance)} onPressDisconnect={() => deleteAccount(dispatch, logout, setBalance)} />} />
           <Route path="/marketplace" element={<Marketplace arrayTickets={arrayTickets} buyTicket={buyTicket} />} />
           <Route path="/my-tickets" element={<MyTickets accountArrayTickets={accountArrayTickets} createTicket={createTicket} placeTicketForSale={placeTicketForSale} revokeTicketForSale={revokeTicketForSale} startAuction={startAuction} />} />
           <Route path="/auctions" element={<Auctions auctions={auctions} />} />
-          <Route path="/my-incomes" element={<MyIncomes />} />
+          <Route path="/my-incomes" element={<MyIncomes totalMoney={totalMoney}/>} />
         </Routes>
       </Router>
     </div>

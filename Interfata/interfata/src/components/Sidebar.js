@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-const Sidebar = ({ balance, account }) => {
+const Sidebar = ({ balance, account, totalMoney }) => {
     return (
         <nav className="z-[100] absolute h-20 w-screen bg-white border-gray-200 dark:bg-darkest-blue/[0.5]">
             <div className="flex flex-wrap items-center justify-between mx-auto px-8 py-5">
@@ -32,7 +32,15 @@ const Sidebar = ({ balance, account }) => {
                         }
                         {
                             account &&
-                            <li><NavLink to="/my-incomes" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">My Incomes</NavLink></li>
+                            <li><NavLink to="/my-incomes" className="relative text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">My Incomes
+                                {
+                                    totalMoney > 0 &&
+                                    <span class="absolute -top-2 -right-2 flex h-3 w-3">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+                                    </span>
+                                }
+                            </NavLink></li>
                         }
                     </ul>
                     {

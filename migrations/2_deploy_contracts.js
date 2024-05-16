@@ -6,5 +6,5 @@ module.exports = async function(deployer) {
   await deployer.deploy(Ticket);
   const ticket = await Ticket.deployed();
   await deployer.deploy(TicketAuction, ticket.address);
-  deployer.deploy(Withdrawable);
+  await deployer.deploy(Withdrawable);
 };

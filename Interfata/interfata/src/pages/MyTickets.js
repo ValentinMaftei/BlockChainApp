@@ -4,11 +4,14 @@ import TicketSell from "../components/TicketSell";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useState } from "react";
 import { setChanges } from "../features/UserSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const MyTickets = ({ accountArrayTickets, createTicket, placeTicketForSale, revokeTicketForSale, startAuction }) => {
     const dispatch = useDispatch();
+    
     const [isOpen, setIsOpen] = useState(false);
+    const account = useSelector(state => state.user.id);
+
     const { register, handleSubmit } = useForm();
 
     const togglePopup = () => {
@@ -16,7 +19,7 @@ const MyTickets = ({ accountArrayTickets, createTicket, placeTicketForSale, revo
     }
 
     const onSubmit = async (data) => {
-        await createTicket(data.name, data.description);
+        await createTicket(data.name, data.description, account);
         togglePopup();
         dispatch(setChanges());
     }
