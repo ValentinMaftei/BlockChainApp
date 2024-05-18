@@ -169,11 +169,30 @@ export const convertEtherToWei = (price) => {
 
 export const buyTicket = async (id, price, acc) => {
     try {
-        await ticketContract.methods.buyTicket(id).send({ from: acc, value: parseFloat(price) });
+        const transaction = await ticketContract.methods.buyTicket(id).send({ from: acc, value: parseFloat(price) });
+
+        const txHash = transaction.transactionHash;
+        console.log("Transaction sent. Hash:", txHash);
+
+        const web3 = new Web3(Web3.givenProvider || 'http://localhost:7545');
+        let receipt = null;
+        while (receipt === null) {
+            receipt = await web3.eth.getTransactionReceipt(txHash);
+            if (receipt !== null) {
+                if (receipt.status) {
+                    console.log("Transaction confirmed:", receipt);
+                } else {
+                    console.error("Transaction failed:", receipt);
+                }
+            } else {
+                console.log("Transaction is pending...");
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
     } catch (error) {
         console.error("Error buying ticket:", error);
     }
-}
+};
 
 
 export const renderAuctions = async () => {
@@ -217,8 +236,27 @@ export const endAuction = async (id, acc) => {
 
 export const placeBid = async (id, price, acc) => {
     try {
-        const priceInWei = Web3.utils.toWei(Number(price).toFixed(18), 'ether');
-        await ticketAuctionContract.methods.placeBid(parseInt(id)).send({ from: acc, value: priceInWei });
+        const priceInWei = Web3.utils.toWei(parseFloat(price).toFixed(18), 'ether');
+        const transaction = await ticketAuctionContract.methods.placeBid(parseInt(id)).send({ from: acc, value: priceInWei });
+
+        const txHash = transaction.transactionHash;
+        console.log("Transaction sent. Hash:", txHash);
+
+        const web3 = new Web3(Web3.givenProvider || 'http://localhost:7545');
+        let receipt = null;
+        while (receipt === null) {
+            receipt = await web3.eth.getTransactionReceipt(txHash);
+            if (receipt !== null) {
+                if (receipt.status) {
+                    console.log("Transaction confirmed:", receipt);
+                } else {
+                    console.error("Transaction failed:", receipt);
+                }
+            } else {
+                console.log("Transaction is pending...");
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
     } catch (error) {
         console.error("Error placing bid:", error);
     }

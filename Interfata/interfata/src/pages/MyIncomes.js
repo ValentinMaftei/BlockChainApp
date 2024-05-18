@@ -10,8 +10,6 @@ import { convertWeiToEther, getTotalValuePendingReturns, withdrawAll } from "../
 const MyIncomes = ({ totalMoney }) => {
     const dispatch = useDispatch();
     const [isOpen, setIsOpen] = useState(false);
-    const { register, handleSubmit } = useForm();
-    const changes = useSelector(state => state.user.changes);
     const account = useSelector(state => state.user.id);
 
     const togglePopup = () => {
@@ -21,10 +19,6 @@ const MyIncomes = ({ totalMoney }) => {
     const handleWithdrawAllIncomes = async () => {
         await withdrawAll(account);
         dispatch(setChanges());
-    }
-
-    const onSubmit = async (data) => {
-        console.log(data);
     }
 
     return (

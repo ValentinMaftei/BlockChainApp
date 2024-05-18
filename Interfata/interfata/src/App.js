@@ -25,7 +25,6 @@ function App() {
   const [totalMoney, setTotalMoney] = useState(null);
 
   const initializeContracts = async () => {
-    console.log("Initializing contracts");
     await loadContract();
     setArrayTickets(await renderTickets());
     setAuctions(await renderAuctions());

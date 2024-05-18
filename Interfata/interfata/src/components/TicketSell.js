@@ -34,7 +34,6 @@ const TicketSell = ({ ticket, placeTicketForSale, revokeTicketForSale, startAuct
     }
 
     const onSubmitAuction = async (data) => {
-        console.log("heeeere ", account);
         await startAuction(ticket.id, convertEtherToWei(data.startingPrice), account);
         dispatch(setChanges());
         toggleAuctionPopup();

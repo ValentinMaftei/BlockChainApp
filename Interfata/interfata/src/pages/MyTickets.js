@@ -34,9 +34,6 @@ const MyTickets = ({ accountArrayTickets, createTicket, placeTicketForSale, revo
                     <div className="w-full flex flex-col items-center justify-center gap-4">
                         <button type="button" onClick={togglePopup} class="w-[25%] text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:opacity-[0.8] focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg px-5 py-2.5 text-center">ADD TICKET</button>
                         {
-                            console.log(accountArrayTickets)
-                        }
-                        {
                             accountArrayTickets && accountArrayTickets.length > 0 &&
                             accountArrayTickets.map((ticket, index) => (
                                 <TicketSell key={index} ticket={ticket} placeTicketForSale={placeTicketForSale} revokeTicketForSale={revokeTicketForSale} startAuction={startAuction} />
